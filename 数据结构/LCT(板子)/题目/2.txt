@@ -1,0 +1,8 @@
+Case #1:
+ALL SAME
+1 2
+Case #2:
+3 2
+1 1
+3 2
+ALL SAME

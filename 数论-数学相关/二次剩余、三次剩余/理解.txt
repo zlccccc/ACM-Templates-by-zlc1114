@@ -1,0 +1,27 @@
+原根:存在:m=2,4,p^a,2*p^a,p为奇质数,个数phi(phi(p-1))
+  查找:假设是g,从小枚举g
+    phi(m)=p1^a1*p2^a2*...*pk^ak;
+    pow(g,phi(m)/pi)≡1恒成立(m质数则phi=m-1)
+  性质:pow(g,i)%p得到的答案两两不同
+  推论1 若d|(p-1),则x^d≡1(mod p)恰有d个解
+  推论2 若p为素数,d|(p-1),则阶为d (pow(x,d)≡1)
+    的最小剩余(mod p)的个数为phi(d)
+
+二次剩余:x*x≡n(mod p)
+1.小的(a=0|p=2)直接判断
+2.pow(n,(p-1)/2)≡1或-1(mod p)
+  pow(n,(p-1)/2)≡1则有解
+3.由于1/2的数字有二次剩余
+  令w=a*a-n;且pow(n,(p-1)/2)≡-1
+  struct A+B*sqrt(w):
+  pow(a+sqrt(w),p)=pow(a,p)+pow(w,(p-1)/2)*sqrt(w))
+                  ≡a-sqrt(w)
+  pow(a+sqrt(w),p+1)≡a*a-w≡n
+  pow(a+sqrt(w),(p+1)/2)即为答案
+
+三次剩余:x*x*x≡n(mod p)
+1.小的(a=0|p=2,3)直接判断
+2.p≡-1(mod 3):x≡pow(a,(2*p-1)/3)
+3.p≡1(mod 3):设e为三次单位根,e*e*e≡1(mod p)
+  pow(a,(p-1)/3)≡1(mod p)则有三次剩余
+  
