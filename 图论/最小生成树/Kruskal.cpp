@@ -27,7 +27,6 @@ LL gcd(LL a,LL b){return b?gcd(b,a%b):a;}
 template<typename T>inline T abs(T a) {return a>0?a:-a;}
 template<typename T>inline T powMM(T a,T b){T ret=1;for (;b;b>>=1ll,a*=a) ret=1ll*ret*a%M;return ret;}
 
-
 struct node{
 	int u,v,len;
 	bool operator<(const node &A)const{
