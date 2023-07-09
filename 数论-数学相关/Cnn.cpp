@@ -22,20 +22,22 @@ inline LL max(LL a,LL b) {return a<b?b:a;}
 inline LL abs(LL a,LL b) {return a>0?a:-a;}
 inline double abs(double a,double b) {return a>0?a:-a;}
 
-// 计数题的时候, "选择"和"方案"分开算是一个不错的选择~
+//结论:p=2: C(n,k)%2==0当且仅当n&k==k (n|k==n)
+// --> 1+x^(2^k) (mod 2) = (1+x)^(2^k)
 
-// 注意n>M时要用lucas!
+//计数题的时候, "选择"和"方案"分开算是一个不错的选择~
+//注意n>M时要用lucas!
 LL inv[1000002];//inverse
 LL fac[1000002];//Factorial
-// 求出的是ax+by=1的解(a,b正负不限,而且挺小的);
-// d(gcd)==1时存在逆元;(d!=1)&&(num|d)时,num*a/d可认为逆元
-// (x+p)%p为逆元
-// DP:C[i][j]=(C[i-1][j-1]+C[i][j-1])%M
+//求出的是ax+by=1的解(a,b正负不限,而且挺小的);
+//d(gcd)==1时存在逆元;(d!=1)&&(num|d)时,num*a/d可认为逆元
+//(x+p)%p为逆元
+//DP:C[i][j]=(C[i-1][j-1]+C[i][j-1])%M
 void exgcd(LL a,LL b,LL &d,LL &x,LL &y) {
     if (!b) {d=a; x=1; y=0;}
     else {exgcd(b,a%b,d,y,x); y-=a/b*x;}
 }
-// 前面那个线性求逆元的log版2333
+//前面那个线性求逆元的log版2333
 int getinv(int n) {
     if (n==1) return 1;
     return (M-M/n)*(getinv(M%n))%M;
@@ -43,6 +45,9 @@ int getinv(int n) {
 LL C(int n,int m) {
     return fac[n]*inv[m]%M*inv[n-m]%M;
 }
+//Lucas定理：
+//C(n,k)%p=\mul{C(ni,ki)},ni和ki是k进制下的n和k对应位置的值
+//结论:p=2: C(n,k)%2==0当且仅当n&k==k
 //Lucas扩展：Kummer定理：
 //C(n,k)中的p的幂次的为p进制下n-k借位次数
 //e.g.求C(n,0)...C(n,n)的lcm%(1e9+7)
@@ -58,7 +63,7 @@ int main() {
     inv[0]=inv[1]=1;
     FOR(i,2,1000000) inv[i]=(M-M/i)*inv[M%i]%M;
     FOR(i,1,1000000) inv[i]=inv[i]*inv[i-1]%M;// inv(n!)
-    printf("%I64d",C(10,3));
+    printf("%I64d",C(70,10));
 }
 /*
 */

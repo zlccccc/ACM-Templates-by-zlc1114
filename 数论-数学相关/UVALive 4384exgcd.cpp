@@ -30,6 +30,7 @@ LL gcd(LL a,LL b){return b?gcd(b,a%b):a;}
 template<typename T>inline T abs(T a) {return a>0?a:-a;}
 template<typename T>inline T powMM(T a,T b){T ret=1;for (;b;b>>=1ll,a=1ll*a*a%M) if (b&1) ret=1ll*ret*a%M;return ret;}
 
+// ax+by=1; a和b已知
 int n,m;
 int i,j,k;
 void exgcd(LL a,LL b,LL &d,LL &x,LL &y){//d==0时存在逆元 //(x+p)%p为逆元

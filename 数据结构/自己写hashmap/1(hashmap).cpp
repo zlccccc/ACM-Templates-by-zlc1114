@@ -24,3 +24,24 @@ template<typename T1,typename T2> struct hashmap{
         return T[size-1].val;
     }
 };
+
+
+namespace Hash{
+    typedef unsigned int uint;
+    const uint S=16,S1=32-S,M=1996090921;
+    #define H(x) ((uint)x*M>>S1)
+    struct node{int x,y,t;}h[(1<<S)+105];
+    int T=1; // time
+    inline void insert(int x){
+        node *p=h+H(x);
+        for (;p->t==T;++p)
+            if (p->x==x){++p->y; return;}
+        p->t=T; p->x=x; p->y=1;
+    }
+    inline int find(int x){
+        for (node *p=h+H(x);p->t==T;++p)
+            if (p->x==x)return p->y;
+        return 0;
+    }
+    #undef H
+} using namespace Hash;

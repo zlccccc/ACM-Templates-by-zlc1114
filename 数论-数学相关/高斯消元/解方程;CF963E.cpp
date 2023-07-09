@@ -39,6 +39,7 @@ template<typename T>inline T powMM(T a, T b) {
     return ret;
 }
 
+// n个方程,m个未知数; 连着N个数字有值
 bool gauss(int A[8007][8007],int X[8007],int n,int m,int N) {
     int i,j,k;
     REP(i,n) {

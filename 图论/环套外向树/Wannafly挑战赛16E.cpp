@@ -71,12 +71,14 @@ int que(int x,int l,int r,int L,int R) {
     if (mid<r) ret+=que(T[x].r,l,r,mid+1,R);
     return ret;
 }
+
+// 注意edge一定要加上; 而且一定要dfs
 int A[maxn];
 vector<int> cir,edge[maxn];
 map<int,int> cirnum[maxn];
 int vis[maxn],cfa[maxn],circnt[maxn],dep[maxn];
 int in[maxn],out[maxn],dtot,ctot;
-void dfs(int x,int depth,int cir_id) {
+void dfs(int x,int depth,int cir_id) { // must dfs!
     vis[x]=1; in[x]=++dtot; cfa[x]=cir_id; dep[x]=depth;
     for (int v:edge[x]) dfs(v,depth+1,cir_id);
     out[x]=dtot;

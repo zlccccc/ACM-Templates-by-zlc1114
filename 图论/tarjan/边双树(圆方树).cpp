@@ -111,7 +111,7 @@ namespace tarjan { // 边双连通分量, 这里是在做仙人掌
                     if (low[v]==dfn[x]) { //双联通, 在这里dp
                         deputs(" circle :");//环, eid; pid
                         int nowid=n+(++more);
-                        // for (int v:pid) debug("%d ",v); deputs(" <- link");
+                        for (int v:pid) debug("%d ",v); deputs(" <- link");
                         for (int v:pid) {
                             ox_edge[nowid].push_back(make_pair(0,v));
                             ox_edge[v].push_back(make_pair(0,nowid));
@@ -126,7 +126,7 @@ namespace tarjan { // 边双连通分量, 这里是在做仙人掌
                             ox_edge[nowe.v].push_back(make_pair(nowe.len,nowe.u));
                         }
                     }
-                    debug("%d %d\n",low[v],dfn[x]);
+                    debug("low and dfn x=[%d]: %d %d\n",x,low[v],dfn[x]);
                 }
             } else if (vis[v])
                 low[x]=min(low[x],dfn[v]);

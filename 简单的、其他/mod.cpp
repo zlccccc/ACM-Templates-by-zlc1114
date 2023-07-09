@@ -1,9 +1,9 @@
 const int mod = 998244353;
 struct mint {
-  ll x;
+  long long x;
   mint():x(0){}
-  mint(ll x):x((x%mod+mod)%mod){}
-  // mint(ll x):x(x){}
+  mint(long long x):x((x%mod+mod)%mod){}
+  // mint(long long x):x(x){}
   mint& fix() { x = (x%mod+mod)%mod; return *this;}
   mint operator-() const { return mint(0) - *this;}
   mint operator~() const { return mint(1) / *this;}
@@ -15,7 +15,7 @@ struct mint {
   mint operator-(const mint& a)const{ return mint(*this) -= a;}
   mint operator*(const mint& a)const{ return mint(*this) *= a;}
   mint operator/(const mint& a)const{ return mint(*this) /= a;}
-  mint pow(ll t) const {
+  mint pow(long long t) const {
     if(!t) return 1;
     mint res = pow(t/2);
     res *= res;

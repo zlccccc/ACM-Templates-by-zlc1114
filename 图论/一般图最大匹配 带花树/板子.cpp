@@ -26,7 +26,12 @@ const double eps=0.00000001;
 LL gcd(LL a,LL b) {return b?gcd(b,a%b):a;}
 template<typename T>inline T abs(T a) {return a>0?a:-a;}
 template<typename T>inline T powMM(T a,T b) {T ret=1; for (; b; b>>=1ll,a*=a) ret=1ll*ret*a%M; return ret;}
+
 //缩奇环
+//nowcoder2021七夕节题目:
+//有k个set,每个set选两次算被选中,问能选几个set
+//将set拆点之后就变成了一般图最大匹配
+//很多这样的题拆点/边->点匹配都可以这么做, 边和点黑白染色后匹配即可
 int n,m;
 vector<int> edge[maxn];
 bool inQueue[maxn];

@@ -32,6 +32,7 @@ template<typename T>inline T powMM(T a,T b){T ret=1;for (;b;b>>=1ll,a=a*a%M) if 
 //or/and的理解:这里的变换是利用dp时分治来压位(写成非递归形式)实现的，时间nlogn
 //进行组合可以将二元运算的东西都组合出来 
 //实际上or都没用 
+//从底向上merge也可以直接使用(底层已经solve完成,merge单层)
 void fwt(LL *A,int len,int inv)//对拍对了 
 {
     int i,j,k;
