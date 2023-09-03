@@ -50,11 +50,11 @@ typedef pair<int,int> pii;
 typedef pair<ll,ll> pll;
 const int INF=0x3f3f3f3f;
 const LL INFF=0x3f3f3f3f3f3f3f3fll;
-const LL maxn=1e6+7;
+const LL maxn=1e5+107;
 const double pi=acos(-1.0);
 const double eps=0.0000000001;
 template<typename T>inline T gcd(T a, T b) {return b?gcd(b,a%b):a;}
-// template<typename T>inline void pr2(T x,int k=64) {ll i; REP(i,k) debug("%d",(x>>i)&1); putchar(' ');}
+template<typename T>inline void pr2(T x,int k=64) {ll i; REP(i,k) debug("%d",(x>>i)&1); putchar(' ');}
 template<typename T>inline void max_(T &A,T B) {(A<B) &&(A=B);}
 template<typename T>inline void min_(T &A,T B) {(A>B) &&(A=B);}
 template<typename T>inline T abs(T a) {return a>0?a:-a;}
@@ -74,9 +74,7 @@ typedef array<int,3> ar3;
 std::mt19937 rng(time(0));
 std::mt19937_64 rng64(time(0));
 
-// const int mod = 1e9+7;
-const int mod=998244353;
-// int mod=1;
+const int mod = 998244353;
 struct mint {
     long long x;
     mint():x(0) {}
@@ -84,7 +82,7 @@ struct mint {
     // mint(long long x):x(x){}
     mint &fix() { x = (x%mod+mod)%mod; return *this;}
     mint operator-() const { return mint(0) - *this;}
-    mint operator~() const { return mint(1) / *this;}
+    // mint operator~() const { return mint(1) / *this;}
     mint &operator+=(const mint &a) { if ((x+=a.x)>=mod) x-=mod; return *this;}
     mint &operator-=(const mint &a) { if ((x+=mod-a.x)>=mod) x-=mod; return *this;}
     mint &operator*=(const mint &a) { (x*=a.x)%=mod; return *this;}
@@ -102,57 +100,84 @@ struct mint {
     bool operator<(const mint &a)const { return x < a.x;}
     bool operator==(const mint &a)const { return x == a.x;}
 };
-
-// ³ýÁËÆÕÍ¨ÊýÎ»dpÖ®Íâ»¹ÓÐÒ»ÖÖÊýÎ»dpÐèÒªÁË½âÒ»ÏÂ
-// https://codeforces.com/contest/1290/problem/F
-// ÌâÒâ: ¸ø¶¨n<=5ÖÖvector[dx,dy];×é³ÉµÄÍ¹°ü²»ÄÜ³¬¹ým<=1e9µÄÕý·½ÐÎ,Ñ¯ÎÊÄÜ¹»×é³ÉµÄ²»Í¬Í¹°üÊýÁ¿
-// ÕâÀïÖ±½ÓÎ¬»¤[¶þ½øÖÆÏÂµ½ÁËµÚpÎ»][xÎ¬ÕýÊýµÄ½øÎ»ºÍ][xÎ¬¸ºÊýµÄ½øÎ»ºÍ][yÕý][y¸º][xÕýÖ®ºÍÊÇ·ñ>m][yÕýÖ®ºÍÊÇ·ñ>m]µÄ·½°¸Êý
-// ¸´ÔÓ¶ÈÊÇ×´Ì¬[logm]*[(4n)^4]*Ã¶¾Ù2^n
-
-// ÕâÖÖ\sum kiXi=Y,nºÜÐ¡¶øYºÜ´óµÄÌâÄ¿,¶¼¿ÉÒÔ¿¼ÂÇÊýÎ»DPÃ¶¾Ù½øÎ»
-// ÊýÎ»dpµÄÊ±ºòÐèÒªÃ¶¾ÙÃ¿Ò»Î»Õâ¸ökiÊÇ·ñÒªÑ¡,Ã¶¾Ù½øÎ»,¿¼ÂÇ¼ÓÍêÒÔºóµÄ½øÎ»ºÍµ±Ç°ÕâÎ»val
-// ¸´ÔÓ¶ÈµÄ»°Ã¶¾Ù[½øÎ»][ÊÇ·ñ>Y]¿ÉÒÔ×öµ½×´Ì¬[n*logY]*Ã¶¾Ùn
-
-// CF 1073 E
-// ²»Í¬Î»Êý×î¶àk¸ö
-int k;
-const int MLEN=18; // max-length
-bool vis[MLEN][1024][2];
-pair<mint,mint> f[MLEN][1024][2];
-int lval[MLEN],rval[MLEN];
-ll pw10[MLEN]; // Î»
-pair<mint,mint> calc(int x,int bit,int not_0,int l_limit,int r_limit) {
-    if (x==-1) return {__builtin_popcount(bit)<=k,0}; // cnt,sum
-    if (!l_limit&&!r_limit&&vis[x][bit][not_0]) return f[x][bit][not_0];
-    pair<mint,mint> ret={0,0};
-    int l=0,r=9;
-    if (l_limit) l=max(l,lval[x]);
-    if (r_limit) r=min(r,rval[x]);
-    FOR_(i,l,r) {
-        int nxtbit=bit;
-        if (not_0||i) nxtbit|=1<<i;
-        pair<mint,mint> cur=calc(x-1,nxtbit,not_0||i,l_limit&&(i==l),r_limit&&(i==r));
-        ret.first+=cur.first;
-        ret.second+=cur.second+cur.first*pw10[x]*i;
+struct comb {
+    vector<mint> fac,inv; // f:fac; g:inv
+    comb() {}
+    comb(int MAX):fac(MAX),inv(MAX) {
+        fac[0] = 1;
+        rep_(i,1,MAX) fac[i] = fac[i-1]*i;
+        inv[MAX-1] = fac[MAX-1].pow(mod-2);
+        rrep_(i,1,MAX) inv[i-1] = inv[i]*i;
     }
-    // printf("x=%d; bit=%d; not0=%d; l_limit=%d; r_limit=%d; ret=%lld %lld\n",x,bit,not_0,l_limit,r_limit,ret.first.x,ret.second.x);
-    if (!l_limit&&!r_limit) f[x][bit][not_0]=ret,vis[x][bit][not_0]=1;
-    return ret;
+    mint operator()(int a, int b) {
+        if (a < b) return 0;
+        return fac[a]*inv[b]*inv[a-b];
+    }
+} C(maxn);
+
+// exgcd
+void exgcd(__int128 a,__int128 b,__int128 &d,__int128 &x,__int128 &y){//d==0æ—¶å­˜åœ¨é€†å…ƒ //(x+p)%pä¸ºé€†å…ƒ
+    if (!b) {d=a;x=1;y=0;}
+    else {exgcd(b,a%b,d,y,x);y-=a/b*x;}
 }
-mint calc(ll l,ll r) {
-    pw10[0]=1;
-    rep_(i,1,MLEN) pw10[i]=pw10[i-1]*10;
-    REP_(i,MLEN) lval[i]=l%10,l/=10;
-    REP_(i,MLEN) rval[i]=r%10,r/=10;
-    return calc(MLEN-1,0,0,1,1).second;
+// æ±‚l->rèŒƒå›´å†…çš„x
+pair<__int128,__int128> limit(__int128 a,__int128 b,__int128 l,__int128 r) { // l<=ax+b<=r
+    // ll A=a,B=b,L=l,R=r;
+    if (a<0) a=-a,b=-b,l=-l,r=-r,swap(l,r);
+    if (a==0) {
+        if (l<=b&&b<=r) return {-INFF,INFF};
+        else return {1,0}; // zero
+    }
+    l=l-b+a-1; r=r-b;
+    ll fl=l/a,fr=r/a;
+    if (l-fl*a<0) fl--;
+    if (r-fr*a<0) fr--;
+    // FOR_(x,fl,fr) printf("%lld(%lld,%lld->%lld) ",A*x+B,a*x+b,L,R); puts("  <- solve");
+    return {fl,fr};
 }
+// Ax+By=Cæ±‚é€šè§£,1<=x,y<=MAX; è®¡ç®—è¿‡ç¨‹ä¸­å¯èƒ½å¾ˆå¤§
+ll solve(__int128 A,__int128 B,__int128 C,__int128 MAX) { // A*(x+kb)+B*(y-ka)=C
+    __int128 d,x,y;
+    exgcd(A,B,d,x,y);
+    if (C%d!=0) return 0; // d=gcd,è¿™ä¸ªæ˜¯æ²¡æœ‰è§£
+    // printf("solve %lld %lld %lld\n",A,B,C);
+    __int128 a=A/d,b=B/d,c=C/d;
+    x=x*c; y=y*c;
+    // åˆæ³•çš„è§£: x'=x+kb; y'=y-ka;
+
+    // printf("solve %lld x + %lld y = %lld; sum=%lld; x,y=%lld %lld\n",a,b,c,x*A+y*B,x,y);
+
+    pair<__int128,__int128> limx=limit(b,x,1,MAX);
+    pair<__int128,__int128> limy=limit(-a,y,1,MAX);
+
+    // printf("solve lx,rx=%lld %lld; ly,ry=%lld %lld\n",limx.first,limx.second,limy.first,limy.second);
+
+    __int128 left=max(limx.first,limy.first),right=min(limx.second,limy.second);
+    // FOR_(k,left,right) {
+    //     ll dx=x+k*b,dy=y-k*a;
+    //     printf("solve %lld x + %lld y = %lld; sum=%lld; k=%d, x,y=%lld %lld\n",a,b,c,dx*A+dy*B,k,dx,dy);
+    // }
+    if (left<=right) return right-left+1;
+    else return 0;
+}
+// ATC 315G
+// é¢˜æ„:Ax+By+Cz=X,1<=x,y<=N,æ±‚ç­”æ¡ˆ
 int main() {
-    ll l,r;
-    scanf("%lld%lld%d",&l,&r,&k);
-    // FOR_(i,l,r) printf("%d : %lld\n",i,calc(i,i).x);
-    printf("%lld\n",calc(l,r).x);
+    int T,_; T=1;
+    // T=10000;
+    // scanf("%d",&T);
+    FOR(_,1,T){
+        ll N,A,B,C,X;
+        ll ans=0;
+        scanf("%lld%lld%lld%lld%lld",&N,&A,&B,&C,&X);
+        FOR_(i,1,N) {
+            if (X-C*i<=0) break;
+            ans+=solve(A,B,X-C*i,N);
+        }
+        printf("%lld\n",ans);
+    }
 }
 /*
-10
-1 10
+5 3 4 5 40
+
 */

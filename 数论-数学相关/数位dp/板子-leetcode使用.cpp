@@ -26,12 +26,6 @@ using namespace std;
 #define rrep(I,S,N) for (I=N-1;I>=S;I--)
 #define FOR(I,S,N) for (I=S;I<=N;I++)
 #define rFOR(I,S,N) for (I=N;I>=S;I--)
-#define REP_(I,N) for (int I=0;I<N;I++)
-#define rREP_(I,N) for (int I=N-1;I>=0;I--)
-#define rep_(I,S,N) for (int I=S;I<N;I++)
-#define rrep_(I,S,N) for (int I=N-1;I>=S;I--)
-#define FOR_(I,S,N) for (int I=S;I<=N;I++)
-#define rFOR_(I,S,N) for (int I=N;I>=S;I--)
 
 #define DEBUG
 #ifdef DEBUG
@@ -103,54 +97,60 @@ struct mint {
     bool operator==(const mint &a)const { return x == a.x;}
 };
 
-// 除了普通数位dp之外还有一种数位dp需要了解一下
-// https://codeforces.com/contest/1290/problem/F
-// 题意: 给定n<=5种vector[dx,dy];组成的凸包不能超过m<=1e9的正方形,询问能够组成的不同凸包数量
-// 这里直接维护[二进制下到了第p位][x维正数的进位和][x维负数的进位和][y正][y负][x正之和是否>m][y正之和是否>m]的方案数
-// 复杂度是状态[logm]*[(4n)^4]*枚举2^n
 
-// 这种\sum kiXi=Y,n很小而Y很大的题目,都可以考虑数位DP枚举进位
-// 数位dp的时候需要枚举每一位这个ki是否要选,枚举进位,考虑加完以后的进位和当前这位val
-// 复杂度的话枚举[进位][是否>Y]可以做到状态[n*logY]*枚举n
+#define REP_(I,N) for (int I=0;I<N;I++)
+#define rREP_(I,N) for (int I=N-1;I>=0;I--)
+#define rep_(I,S,N) for (int I=S;I<N;I++)
+#define rrep_(I,S,N) for (int I=N-1;I>=S;I--)
+#define FOR_(I,S,N) for (int I=S;I<=N;I++)
+#define rFOR_(I,S,N) for (int I=N;I>=S;I--)
 
-// CF 1073 E
-// 不同位数最多k个
-int k;
-const int MLEN=18; // max-length
-bool vis[MLEN][1024][2];
-pair<mint,mint> f[MLEN][1024][2];
+typedef long long DPTYPE;
+
+const int MLEN=18,MID=10; // max-length
+bool vis[MLEN][24][24][24][2];
+DPTYPE f[MLEN][24][24][24][2];
 int lval[MLEN],rval[MLEN];
-ll pw10[MLEN]; // 位
-pair<mint,mint> calc(int x,int bit,int not_0,int l_limit,int r_limit) {
-    if (x==-1) return {__builtin_popcount(bit)<=k,0}; // cnt,sum
-    if (!l_limit&&!r_limit&&vis[x][bit][not_0]) return f[x][bit][not_0];
-    pair<mint,mint> ret={0,0};
+DPTYPE pw10[MLEN]; // 位
+DPTYPE calc(int x,int k,int val,int mod,int not_0,int l_limit,int r_limit) { // k: 奇数位数
+    // printf("calc %d k=%d %d %d; %d %d %d\n",x,k,val,mod,not_0,l_limit,r_limit);
+    if (x==-1) return (k==MID&&val==0); // cnt,sum
+    if (!l_limit&&!r_limit&&vis[x][k][val][mod][not_0]) return f[x][k][val][mod][not_0];
+    DPTYPE ret=0;
     int l=0,r=9;
     if (l_limit) l=max(l,lval[x]);
     if (r_limit) r=min(r,rval[x]);
     FOR_(i,l,r) {
-        int nxtbit=bit;
-        if (not_0||i) nxtbit|=1<<i;
-        pair<mint,mint> cur=calc(x-1,nxtbit,not_0||i,l_limit&&(i==l),r_limit&&(i==r));
-        ret.first+=cur.first;
-        ret.second+=cur.second+cur.first*pw10[x]*i;
+        int nxtk=k,nxtval=val;
+        if (not_0||i) {
+            if (i&1) nxtk++; else nxtk--;
+            nxtval=(val+pw10[x]*i)%mod;
+        }
+        DPTYPE cur=calc(x-1,nxtk,nxtval,mod,not_0||i,l_limit&&(i==l),r_limit&&(i==r));
+        ret+=cur;
     }
     // printf("x=%d; bit=%d; not0=%d; l_limit=%d; r_limit=%d; ret=%lld %lld\n",x,bit,not_0,l_limit,r_limit,ret.first.x,ret.second.x);
-    if (!l_limit&&!r_limit) f[x][bit][not_0]=ret,vis[x][bit][not_0]=1;
+    if (!l_limit&&!r_limit) f[x][k][val][mod][not_0]=ret,vis[x][k][val][mod][not_0]=1;
     return ret;
 }
-mint calc(ll l,ll r) {
+DPTYPE calc(long long l,long long r,int k) {
     pw10[0]=1;
     rep_(i,1,MLEN) pw10[i]=pw10[i-1]*10;
     REP_(i,MLEN) lval[i]=l%10,l/=10;
     REP_(i,MLEN) rval[i]=r%10,r/=10;
-    return calc(MLEN-1,0,0,1,1).second;
+    return calc(MLEN-1,MID,0,k,0,1,1);
 }
+class Solution {
+public:
+    int numberOfBeautifulIntegers(int low, int high, int k) {
+        return calc(low,high,k);
+    }
+};
 int main() {
-    ll l,r;
-    scanf("%lld%lld%d",&l,&r,&k);
-    // FOR_(i,l,r) printf("%d : %lld\n",i,calc(i,i).x);
-    printf("%lld\n",calc(l,r).x);
+    cout << calc(10,20,3) << endl;
+    cout << calc(1,10,1) << endl;
+    cout << calc(5,5,2) << endl;
+
 }
 /*
 10

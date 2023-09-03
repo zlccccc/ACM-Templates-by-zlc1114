@@ -67,6 +67,7 @@ void printTimer() {debug("/--- Time: %ld milliseconds ---/\n",clock()-startTime)
 namespace BruteForce {
     vector<int> mul(const vector<int> &A,const vector<int> &B,int mod)  { //C=A*B
         int n=A.size(),m=B.size();
+        if (!n||!m) return vector<int>();
         int i,j;
         vector<int> C(n+m-1,0);
         REP(i,n) REP(j,m) add_(C[i+j],(ll)A[i]*B[j]%mod,mod);
@@ -584,10 +585,6 @@ namespace polynomial {
         work(1,0,n);
         return ret.v;
     }
-}
-
-using namespace polynomial;
-namespace problems {
     // 无限背包, A是物体size, m是最大size
     // f(x) = 1/\mul(1-x^i)
     // 求ln(x)然后exp
@@ -605,7 +602,7 @@ namespace problems {
         return res.v;
     }
 
-    // 例题:
+    // 像这种dp题都可以用分治fft做:
     // f[1]=f[2]=1;
     // FOR(i,3,n) { // last-color
     //     FOR(j,1,i-1) {
@@ -615,29 +612,34 @@ namespace problems {
     // }
     // 分治fft(卷自己)
     // f[x+y]+=f[x]*f[y]*...; 枚举x or y in range(l,m); 计算另一半的贡献即可
-    vector<int> solve(int n) {
+    //F0=1
+    //Fn=An*\sum{i+j<n}∑FiFj
+    int A[maxn];
+    vector<int> solve_ATC315Ex(int n) {
         vector<int> ans; ans.resize(n+1,0);
+        vector<int> prefsum; prefsum.resize(n+1,0);
         function<void(int, int, int)> work = [&](int p,int l,int r) {
             int i,j;
-            if (l+1==r) {
-                if (l==1||l==2) ans[l]=1;
-                else add_(ans[l],MOD-(ll)(l-1)*ans[l-1]%MOD);
-                // printf("work p=%d: ans=%d l,r=%d->%d\n",p,ans[l],l,r);
+            // printf("work %d %d\n",l,r);
+            if (r-l==1) { // 这里直接改成2也可以的
+                prefsum[l]=(ans[l]+prefsum[l-1])%MOD; // x+y=l
+                ans[l]=(ll)prefsum[l-1]*A[l]%MOD;
+                prefsum[l]=(ans[l]*2ll+prefsum[l])%MOD; // 0,l
+                // printf("l=%d: %d %d\n",l,prefsum[l],ans[l]);
                 return;
             }
-            if (r-l<bruteforce_limit) {
-            // if (r-l<2) {
+            if (r-l<=bruteforce_limit) { // 这里不写也可以
                 rep(i,l,r) {
-                    if (i==1||i==2) {ans[i]=1; continue;}
                     rep(j,l,i) { // l<=j<i; no i-j limit
-                        // printf("l,r=%d %d; i=%d j=%d i-j=%d\n",l,r,i,j,i-j);
-                        add_(ans[i],(ll)ans[j]*ans[i-j]%MOD*C(i-1,j-1)%MOD*2%MOD);
+                        add_(ans[i],(ll)ans[j]*ans[i-j]%MOD,MOD);
                     }
                     rep(j,1,min(l,i-l+1)) { // j<l and l<=i-j<i;
-                        // printf("l,r=%d %d; i=%d j=%d i-j=%d\n",l,r,i,j,i-j);
-                        add_(ans[i],(ll)ans[j]*ans[i-j]%MOD*C(i-1,j-1)%MOD*2%MOD);
+                        add_(ans[i],(ll)ans[j]*ans[i-j]%MOD,MOD);
                     }
-                    add_(ans[i],MOD-(ll)(i-1)*ans[i-1]%MOD);
+                    prefsum[i]=(ans[i]+prefsum[i-1])%MOD; // x+y=i
+                    ans[i]=(ll)prefsum[i-1]*A[i]%MOD;
+                    prefsum[i]=(ans[i]*2ll+prefsum[i])%MOD; // 0,i
+                    // printf("i=%d: %d %d\n",i,prefsum[i],ans[i]);
                 }
                 return;
             }
@@ -647,28 +649,31 @@ namespace problems {
             {
                 vector<int> xv,yv;
                 // x=i-j, y=j;  x or y in range(l,m)
-                rep(i,l,m) xv.push_back((ll)ans[i]*inv[i]%MOD*2%M); // x=l->m-1
-                rep(i,1,r-l) yv.push_back((ll)ans[i]*inv[i-1]%M); // y=1->r-l-1
+                rep(i,l,m) xv.push_back(ans[i]); // x=l->m-1
+                rep(i,1,r-l) yv.push_back(ans[i]); // y=1->r-l-1
                 poly mul=poly(xv)*poly(yv);
-                rep(i,m,r) add_(ans[i],(ll)mul[i-l-1]*fac[i-1]%M);
+                rep(i,m,r) add_(ans[i],mul[i-l-1],MOD);
             }
             // printf("work p=%d: sol 1 ans=%d l,r=%d->%d\n",p,ans[l],l,r);
             {
                 vector<int> xv,yv;
                 // x=i-j, y=j;  x or y in range(l,m)
-                rep(i,1,min(r-l,l)) xv.push_back((ll)ans[i]*inv[i]%M*2%M); // x
-                rep(i,l,m) yv.push_back((ll)ans[i]*inv[i-1]%M); // y=l->m
+                rep(i,1,min(r-l,l)) xv.push_back(ans[i]); // x
+                rep(i,l,m) yv.push_back(ans[i]); // y=l->m
                 poly mul=poly(xv)*poly(yv);
-                rep(i,m,r) add_(ans[i],(ll)mul[i-l-1]*fac[i-1]%M);
+                rep(i,m,r) add_(ans[i],mul[i-l-1],MOD);
             }
             // printf("work p=%d: sol 2 ans=%d l,r=%d->%d\n",p,ans[l],l,r);
             work(p*2+1,m,r);
         };
-        work(1,1,n+1);
+        ans[0]=prefsum[0]=1;
+        work(1,1,n+1); // l->r左闭右开
         // for (int v:ans) printf("%d ",v); puts("<- solve");
         return ans;
     }
 }
+using namespace polynomial;
+
 char str[maxn];
 int ans[maxn];
 int main() {

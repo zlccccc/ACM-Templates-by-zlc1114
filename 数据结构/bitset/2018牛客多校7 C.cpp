@@ -126,7 +126,7 @@ int main() {
     } MP[0][now]++;
     // now.print();puts("");
     REP(k,n) {
-        // printf("%d: %d\n",k,(int)MP[k].size());
+        printf("%d: %d\n",k,(int)MP[k].size());
         for (auto now:MP[k]) {
             auto &V=now.first;
             // V.print(); printf(" %lld\n",now.second);
@@ -159,4 +159,7 @@ int main() {
 10010101010110001001010101011000
 5
 11111111111111111111111111111111
+
+1
+1
 */
