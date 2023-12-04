@@ -1,28 +1,13 @@
-#include <sstream>
-#include <fstream>
-#include <cstdio>
-#include <iostream>
-#include <algorithm>
-#include <vector>
-#include <set>
-#include <map>
-#include <string>
-#include <cstring>
-#include <stack>
-#include <queue>
-#include <cmath>
-#include <ctime>
-#include <utility>
-#include <cassert>
-#include <bitset>
-#include <functional>
+// #pragma GCC optimize("Ofast,no-stack-protector,unroll-loops,fast-math")
+// #pragma GCC target("sse,sse2,sse3,ssse3,sse4.1,sse4.2,avx,avx2,popcnt,tune=native")
+#include <bits/stdc++.h>
 using namespace std;
-#define REP(I,N) for (I=0;I<N;I++)
-#define rREP(I,N) for (I=N-1;I>=0;I--)
-#define rep(I,S,N) for (I=S;I<N;I++)
-#define rrep(I,S,N) for (I=N-1;I>=S;I--)
-#define FOR(I,S,N) for (I=S;I<=N;I++)
-#define rFOR(I,S,N) for (I=N;I>=S;I--)
+#define REP_(I,N) for (int I=0,END=(N);I<END;I++)
+#define rREP_(I,N) for (int I=(N)-1;I>=0;I--)
+#define rep_(I,S,N) for (int I=(S),END=(N);I<END;I++)
+#define rrep_(I,S,N) for (int I=(N)-1,START=(S);I>=START;I--)
+#define FOR_(I,S,N) for (int I=(S),END=(N);I<=END;I++)
+#define rFOR_(I,S,N) for (int I=(N),START=(S);I>=START;I--)
 
 #define DEBUG
 #ifdef DEBUG
@@ -41,36 +26,46 @@ typedef pair<int,int> pii;
 typedef pair<ll,ll> pll;
 const int INF=0x3f3f3f3f;
 const LL INFF=0x3f3f3f3f3f3f3f3fll;
-// const LL M=1e9+7;
-const LL maxn=1e6+107;
+const LL maxn=1e6+7;
 const double pi=acos(-1.0);
 const double eps=0.0000000001;
-LL gcd(LL a, LL b) {return b?gcd(b,a%b):a;}
-template<typename T>inline void pr2(T x,int k=64) {ll i; REP(i,k) debug("%d",(x>>i)&1); putchar(' ');}
+template<typename T>inline void pr2(T x,int k=64) {REP_(i,k) printf("%d",(x>>i)&1); putchar(' ');}
+template<typename T>inline T gcd(T a, T b) {return b?gcd(b,a%b):a;}
 template<typename T>inline void add_(T &A,int B,ll MOD) {A+=B; (A>=MOD) &&(A-=MOD);}
 template<typename T>inline void mul_(T &A,ll B,ll MOD) {A=(A*B)%MOD;}
 template<typename T>inline void mod_(T &A,ll MOD) {A%=MOD; A+=MOD; A%=MOD;}
 template<typename T>inline void max_(T &A,T B) {(A<B) &&(A=B);}
 template<typename T>inline void min_(T &A,T B) {(A>B) &&(A=B);}
 template<typename T>inline T abs(T a) {return a>0?a:-a;}
+template<typename T>inline T fastgcd(T a, T b) {
+    int az=__builtin_ctz(a),bz=__builtin_ctz(b),z=min(az,bz),diff; b>>=bz;
+    while (a) {
+        a>>=az; diff=b-a; az=__builtin_ctz(diff);
+        min_(b,a); a=abs(diff);
+    }
+    return b<<z;
+}
+int startTime;
+void startTimer() {startTime=clock();}
+void printTimer() {debug("/--- Time: %ld milliseconds ---/\n",clock()-startTime);}
+typedef array<int,4> ar4;
+typedef array<int,3> ar3;
+std::mt19937 rng(time(0));
+std::mt19937_64 rng64(time(0));
+
 inline ll powMM(ll a, ll b, ll mod) {
     ll ret=1;
     for (; b; b>>=1ll,a=a*a%mod)
         if (b&1) ret=ret*a%mod;
     return ret;
 }
-int startTime;
-void startTimer() {startTime=clock();}
-void printTimer() {debug("/--- Time: %ld milliseconds ---/\n",clock()-startTime);}
-
 
 namespace BruteForce {
     vector<int> mul(const vector<int> &A,const vector<int> &B,int mod)  { //C=A*B
         int n=A.size(),m=B.size();
         if (!n||!m) return vector<int>();
-        int i,j;
         vector<int> C(n+m-1,0);
-        REP(i,n) REP(j,m) add_(C[i+j],(ll)A[i]*B[j]%mod,mod);
+        REP_(i,n) REP_(j,m) add_(C[i+j],(ll)A[i]*B[j]%mod,mod);
         return C;
     }
 }
@@ -127,19 +122,19 @@ namespace NTT {
         }
         if (inv==-1) {
             int vn=poww(len,MOD-2);
-            REP(i,len) A[i]=mul(A[i],vn);
+            REP_(i,len) A[i]=mul(A[i],vn);
         }
     }
     vector<int> mul(const vector<int> &A,const vector<int> &B) { //C=A*B
         int n=A.size(),m=B.size();
         if (min(n,m)<=bruteforce_limit)
             return BruteForce::mul(A,B,MOD);
-        int len=1; int i;
+        int len=1;
         while (len<n+m-1) len<<=1;
         vector<int> _A(A),_B;
         _A.resize(len,0); dft(_A,len,1);
         if (A==B) _B=_A; else _B=B,_B.resize(len,0),dft(_B,len,1);
-        REP(i,len) _A[i]=mul(_A[i],_B[i]);
+        REP_(i,len) _A[i]=mul(_A[i],_B[i]);
         dft(_A,len,-1); _A.resize(n+m-1);
         return _A;
     }
@@ -157,8 +152,8 @@ namespace FFT { // 任意模数fft
     vector<complex> wn;
     void initwn(int l) {
         if ((int)wn.size()==l) return;
-        wn.resize(l); int i;
-        REP(i,l) wn[i]=complex(cos(2*pi*i/l),sin(2*pi*i/l));
+        wn.resize(l);
+        REP_(i,l) wn[i]=complex(cos(2*pi*i/l),sin(2*pi*i/l));
     }
     void fft(vector<complex> &A,int len,int inv) {
         assert((int)A.size()==len);
@@ -176,7 +171,7 @@ namespace FFT { // 任意模数fft
                     A[k]=a+b; A[k+i/2]=a-b;
                 }
             }
-        } if (inv==-1) REP(i,len) A[i]=complex(A[i].a/len,A[i].b/len);
+        } if (inv==-1) REP_(i,len) A[i]=complex(A[i].a/len,A[i].b/len);
     }
     inline complex conj(complex &A) {return complex(A.a,-A.b);}
     vector<int> mul(const vector<int> &A,const vector<int> &B,int mod) { //C=A*B
@@ -189,15 +184,15 @@ namespace FFT { // 任意模数fft
         vector<int> C(len);
         x1.resize(len); x2.resize(len);
         x3.resize(len); x4.resize(len);
-        static const int S=1<<15 ; int i;
-        REP(i,n) x1[i]=complex(A[i]/S,A[i]%S);
-        rep(i,n,len) x1[i]=complex(); fft(x1,len,1);
+        static const int S=1<<15;
+        REP_(i,n) x1[i]=complex(A[i]/S,A[i]%S);
+        rep_(i,n,len) x1[i]=complex(); fft(x1,len,1);
         if (A==B) x2=x1;
         else {
-            REP(i,m) x2[i]=complex(B[i]/S,B[i]%S); rep(i,m,len) x2[i]=complex();
+            REP_(i,m) x2[i]=complex(B[i]/S,B[i]%S); rep_(i,m,len) x2[i]=complex();
             fft(x2,len,1);
         }
-        REP(i,len) {//这个k1, b1就是前面的, 这就减掉了一半常数
+        REP_(i,len) {//这个k1, b1就是前面的, 这就减掉了一半常数
             int j=(len-i)&(len-1);
             complex k1=(conj(x1[i])+x1[j])*complex(0.5,0);//dft k1
             complex b1=(conj(x1[i])-x1[j])*complex(0,0.5);//dft b1
@@ -206,7 +201,7 @@ namespace FFT { // 任意模数fft
             x3[i]=k1*k2+k1*b2*complex(0,1);
             x4[i]=b1*k2+b1*b2*complex(0,1);
         } fft(x3,len,-1); fft(x4,len,-1);
-        REP(i,len) {
+        REP_(i,len) {
             ll kk=x3[i].a+0.5,kb=x3[i].b+0.5;
             ll bk=x4[i].a+0.5,bb=x4[i].b+0.5;
             C[i]=((kk%mod*S%mod+kb+bk)%mod*S%mod+bb)%mod;
@@ -264,13 +259,13 @@ namespace polynomial {
             return v[n];
         }
         friend poly operator + (const poly &a,const poly &b) {
-            vector<int> ret(max(a.size(),b.size())); int i;
-            REP(i,(int)ret.size())((ret[i]=a[i]+b[i])>=MOD)&&(ret[i]-=MOD);
+            vector<int> ret(max(a.size(),b.size()));
+            REP_(i,(int)ret.size())((ret[i]=a[i]+b[i])>=MOD)&&(ret[i]-=MOD);
             return poly(ret);
         }
         friend poly operator - (const poly &a,const poly &b) {
-            vector<int> ret(max(a.size(),b.size())); int i;
-            REP(i,(int)ret.size())((ret[i]=a[i]-b[i])<0)&&(ret[i]+=MOD);
+            vector<int> ret(max(a.size(),b.size()));
+            REP_(i,(int)ret.size())((ret[i]=a[i]-b[i])<0)&&(ret[i]+=MOD);
             return poly(ret);
         }
         friend poly operator/(const poly &a, const poly &b) {
@@ -503,8 +498,8 @@ namespace polynomial {
             for (int val:v) printf("%d ",val); printf("%s",s);
         }
         void read(int n) {
-            int i; v.resize(n);
-            REP(i,n) scanf("%d",&v[i]),v[i]=(v[i]%MOD+MOD)%MOD;
+            v.resize(n);
+            REP_(i,n) scanf("%d",&v[i]),v[i]=(v[i]%MOD+MOD)%MOD;
         }
     };
 
@@ -567,19 +562,18 @@ namespace polynomial {
         poly _g(g),ret;
         ret.resize(n);
         function<void(int, int, int)> work = [&](int p,int l,int r) {
-            int i,j;
             if (r-l<bruteforce_limit) {
             // if (r-l<2) {
-                rep(i,l,r) {
+                rep_(i,l,r) {
                     if (i<(int)f.size()) ret.v[i]=f[i]; 
-                    rep(j,1,r-i) add_(ret.v[i+j],(ll)ret[i]*g[j]%MOD,MOD);
+                    rep_(j,1,r-i) add_(ret.v[i+j],(ll)ret[i]*g[j]%MOD,MOD);
                 }
                 return;
             }
             int m=(l+r)>>1;
             work(p*2,l,m);
             poly mul=ret.subpoly(l,m-1)*_g.subpoly(1,r-l-1);
-            rep(i,m,r) add_(ret.v[i],mul[i-l-1],MOD);
+            rep_(i,m,r) add_(ret.v[i],mul[i-l-1],MOD);
             work(p*2+1,m,r);
         };
         work(1,0,n);
@@ -619,7 +613,6 @@ namespace polynomial {
         vector<int> ans; ans.resize(n+1,0);
         vector<int> prefsum; prefsum.resize(n+1,0);
         function<void(int, int, int)> work = [&](int p,int l,int r) {
-            int i,j;
             // printf("work %d %d\n",l,r);
             if (r-l==1) { // 这里直接改成2也可以的
                 prefsum[l]=(ans[l]+prefsum[l-1])%MOD; // x+y=l
@@ -629,11 +622,11 @@ namespace polynomial {
                 return;
             }
             if (r-l<=bruteforce_limit) { // 这里不写也可以
-                rep(i,l,r) {
-                    rep(j,l,i) { // l<=j<i; no i-j limit
+                rep_(i,l,r) {
+                    rep_(j,l,i) { // l<=j<i; no i-j limit
                         add_(ans[i],(ll)ans[j]*ans[i-j]%MOD,MOD);
                     }
-                    rep(j,1,min(l,i-l+1)) { // j<l and l<=i-j<i;
+                    rep_(j,1,min(l,i-l+1)) { // j<l and l<=i-j<i;
                         add_(ans[i],(ll)ans[j]*ans[i-j]%MOD,MOD);
                     }
                     prefsum[i]=(ans[i]+prefsum[i-1])%MOD; // x+y=i
@@ -649,19 +642,19 @@ namespace polynomial {
             {
                 vector<int> xv,yv;
                 // x=i-j, y=j;  x or y in range(l,m)
-                rep(i,l,m) xv.push_back(ans[i]); // x=l->m-1
-                rep(i,1,r-l) yv.push_back(ans[i]); // y=1->r-l-1
+                rep_(i,l,m) xv.push_back(ans[i]); // x=l->m-1
+                rep_(i,1,r-l) yv.push_back(ans[i]); // y=1->r-l-1
                 poly mul=poly(xv)*poly(yv);
-                rep(i,m,r) add_(ans[i],mul[i-l-1],MOD);
+                rep_(i,m,r) add_(ans[i],mul[i-l-1],MOD);
             }
             // printf("work p=%d: sol 1 ans=%d l,r=%d->%d\n",p,ans[l],l,r);
             {
                 vector<int> xv,yv;
                 // x=i-j, y=j;  x or y in range(l,m)
-                rep(i,1,min(r-l,l)) xv.push_back(ans[i]); // x
-                rep(i,l,m) yv.push_back(ans[i]); // y=l->m
+                rep_(i,1,min(r-l,l)) xv.push_back(ans[i]); // x
+                rep_(i,l,m) yv.push_back(ans[i]); // y=l->m
                 poly mul=poly(xv)*poly(yv);
-                rep(i,m,r) add_(ans[i],mul[i-l-1],MOD);
+                rep_(i,m,r) add_(ans[i],mul[i-l-1],MOD);
             }
             // printf("work p=%d: sol 2 ans=%d l,r=%d->%d\n",p,ans[l],l,r);
             work(p*2+1,m,r);
@@ -677,10 +670,10 @@ using namespace polynomial;
 char str[maxn];
 int ans[maxn];
 int main() {
-    int n,m,i;
+    int n,m;
     scanf("%d",&n);
     vector<int> v;
-    // REP(i,n) scanf("%d",&m),v.push_back(m);
+    // REP_(i,n) scanf("%d",&m),v.push_back(m);
     // poly _v(v);
     // // (_v*_v).print();
     // // _v.exp(n).print();
@@ -690,7 +683,7 @@ int main() {
     // _v.sqrt(n).print();
     // (_z*_v).print();
     v.push_back(0);
-    rep(i,1,n) scanf("%d",&m),v.push_back(m);
+    rep_(i,1,n) scanf("%d",&m),v.push_back(m);
     vector<int> ans=half_self_fft({1},v,n);
     for (int v:ans) printf("%d ",v);
 
@@ -715,12 +708,12 @@ int main() {
     // scanf("%s",str);
     // int len=strlen(str);
     // ll k=0;
-    // REP(i,len) {
+    // REP_(i,len) {
     //     k=((k*10ll)+str[i]-'0');
     //     if (k>MOD) k=MOD+k%MOD;
     // }
     // ll _k=0;
-    // REP(i,len) {
+    // REP_(i,len) {
     //     _k=((_k*10ll)+str[i]-'0');
     //     if (_k>MOD-1) _k=MOD-1+_k%(MOD-1);
     // }
@@ -737,7 +730,7 @@ int main() {
 
     // scanf("%d",&n);
     // vector<int> a(n),b(n);
-    // REP(i,n) scanf("%d%d",&a[i],&b[i]);
+    // REP_(i,n) scanf("%d%d",&a[i],&b[i]);
     // // poly ans=interpolate(a,b).resize(n);
     // poly ans=poly(a).inter(poly(b)).resize(n);
     // ans.print();
