@@ -13,12 +13,12 @@
 #include <utility>
 #include <cassert>
 using namespace std;
-#define REP(I,N) for (I=0;I<N;I++)
-#define rREP(I,N) for (I=N-1;I>=0;I--)
-#define rep(I,S,N) for (I=S;I<N;I++)
-#define rrep(I,S,N) for (I=N-1;I>=S;I--)
-#define FOR(I,S,N) for (I=S;I<=N;I++)
-#define rFOR(I,S,N) for (I=N;I>=S;I--)
+#define REP_(I,N) for (int I=0,END=(N);I<END;I++)
+#define rREP_(I,N) for (int I=(N)-1;I>=0;I--)
+#define rep_(I,S,N) for (int I=(S),END=(N);I<END;I++)
+#define rrep_(I,S,N) for (int I=(N)-1,START=(S);I>=START;I--)
+#define FOR_(I,S,N) for (int I=(S),END=(N);I<=END;I++)
+#define rFOR_(I,S,N) for (int I=(N),START=(S);I>=START;I--)
 typedef unsigned long long ULL;
 typedef long long LL;
 const int INF=0x3f3f3f3f;
@@ -45,8 +45,8 @@ namespace KDT {
             l=r=0; initval();
         }
         void initval() {
-            int i; size=1;
-            REP(i,DIM) min[i]=max[i]=A[i];
+            size=1;
+            REP_(i,DIM) min[i]=max[i]=A[i];
         }
     } T[maxn*30]; int TOT;
     int Cur;
@@ -54,11 +54,11 @@ namespace KDT {
         return T[x].A[Cur]<T[y].A[Cur];
     }
     void update(int x) {
-        int i; T[x].initval();
+        T[x].initval();
         int l=T[x].l,r=T[x].r;
         if (l) T[x].size+=T[l].size;
         if (r) T[x].size+=T[r].size;
-        REP(i,DIM) {
+        REP_(i,DIM) {
             if (l) {
                 T[x].max[i]=max(T[x].max[i],T[l].max[i]);
                 T[x].min[i]=min(T[x].min[i],T[l].min[i]);
@@ -69,7 +69,7 @@ namespace KDT {
             }
         }
     }
-    int id[maxn],tot;
+    int id[maxn],tot;  // build的时候需要初始化id,T[x]的A[],val
     void build(int &x,int l,int r,int cur) { //should have id
         x=0; if (l>r) return;
         int m=(l+r)/2; Cur=cur;
@@ -157,12 +157,11 @@ void read(int &x) {
     while (*buf>=48)x=x*10+*buf-48,++buf;
 }
 int n,q;
-int i,j,k;
 int root,lastans;
 int main() {
     fread(buffer,1,36000000,stdin);
     read(n); read(q); KDT::TOT=0;
-    FOR(i,1,q) {
+    FOR_(i,1,q) {
         int op;
         read(op);
         if (op==1) {
