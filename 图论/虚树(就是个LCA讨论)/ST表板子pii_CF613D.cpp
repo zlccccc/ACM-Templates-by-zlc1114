@@ -107,7 +107,7 @@ namespace LCA {//内部和外部dfn不同...
         x=ST[x+(1<<t)-1][t]; y=ST[y][t];
         return dep[x]<dep[y]?x:y;
     }
-    inline int dis(int x,int y) {
+    inline ll dis(int x,int y) {
         return len[x]+len[y]-2*len[lca(x,y)];
     }
     void init(int n) {
