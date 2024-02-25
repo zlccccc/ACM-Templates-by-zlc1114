@@ -188,6 +188,7 @@ int main() {
     SEG::init(tot);
     FOR(i,1,n) {
         for (int p=id[i]; pam.len[p]>0; p=pam.fail[pam.anc[p]]) {
+            // 这里这么搞是因为border的特点,每一种回文串影响的左端点是一个区间(x1->x2->x3->x4, 新增的话只会新增个x5)
             int l=max(1,SEG::query(1,dfn[p],out[p],1,tot)-pam.len[p]+1+1);//left-maxposition
             int r=i-pam.len[pam.anc[p]]+1+1;//+1:series-start; 等差数列一起算(比较特殊,可以一起+1)
             BIT::add(l,1); BIT::add(r,-1);
