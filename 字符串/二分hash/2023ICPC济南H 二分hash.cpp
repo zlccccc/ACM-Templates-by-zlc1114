@@ -56,7 +56,7 @@ struct Hash{
         P=p; MOD=mod; px[0]=1;
         FOR_(i,1,n) px[i]=(LL)px[i-1]*p%MOD;
     }
-    void set(int a[]){ // id start from 0
+    void set(const int a[]){ // id start from 0
         val[0]=0; int n=val.size()-1;
         FOR_(i,1,n) val[i]=((LL)val[i-1]*P+a[i-1])%MOD;
     }
