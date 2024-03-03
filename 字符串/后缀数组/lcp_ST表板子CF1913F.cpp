@@ -73,7 +73,7 @@ template <typename T, class Cmp = std::less<T>> struct SparseTable {
         }
     }
     T get(int from, int to) const {
-        assert(0 <= from && from <= to && to <= n);
+        assert(0 <= from && from <= to && to < n);
         int lg = 32 - __builtin_clz(to - from + 1) - 1;
         return std::min(sparse[lg][from], sparse[lg][to - (1 << lg) + 1], cmp);
     }
