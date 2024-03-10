@@ -147,7 +147,7 @@ struct Matrix {
         assert(x.size()==y.size());
         for(int i = 0; i < x.size(); i++) {
             for(int j = 0; j < y.size(); j++) {
-                res[i][j] = D[x[i]][y[i]];
+                res[i][j] = D[x[i]][y[j]];
             }
         }
         return res;
