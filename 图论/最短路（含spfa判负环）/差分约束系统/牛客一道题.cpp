@@ -30,6 +30,7 @@ const double eps=0.00000001;
 LL gcd(LL a,LL b){return b?gcd(b,a%b):a;}
 template<typename T>inline T abs(T a) {return a>0?a:-a;}
 template<typename T>inline T powMM(T a,T b){T ret=1;for (;b;b>>=1ll,a=a*a%M) if (b&1) ret=1ll*ret*a%M;return ret;}
+
 //https://www.nowcoder.net/acm/contest/71/E
 //前缀和进行差分约束
 const int len=20;

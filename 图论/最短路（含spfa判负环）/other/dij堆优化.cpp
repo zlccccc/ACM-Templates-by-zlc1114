@@ -67,7 +67,7 @@ int main() {
             edge[u].push_back(node(v,len));
             edge[v].push_back(node(u,len));
         }
-        dij(1);
+        dij(1,n);
         FOR(i,2,n) printf("%d ",dis[i]==INF?-1:dis[i]);
         puts("");
     }

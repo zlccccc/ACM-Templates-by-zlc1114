@@ -1,10 +1,10 @@
-// 二维sum,常数看起来很小
+// 二维sum,常数看起来很小; 这里是求左闭右开区间的sum
 template <class T> struct fenwick {
     int n;
     vector<T> t;
-    fenwick(int _n = -1) : n(_n), t(n + 1) {}
+    fenwick(int _n = -1) : n(_n), t(n + 1) {} // 范围 [0,n)
     void add(int i, T a) {
-        for (++i; i <= n; i += i & -i)
+        for (++i; i <= n; i += i & -i) // ++i了...
             t[i] += a;
     }
     T sum(int i) const {
@@ -13,7 +13,7 @@ template <class T> struct fenwick {
             s += t[i];
         return s;
     }
-    T sum(int l, int r) const { return sum(r) - sum(l); }
+    T sum(int l, int r) const { return sum(r) - sum(l); } // [l,r) l没算进来...; 由于上面++i了; 所以这里其实是r没算进来
 };
 
 template <class T> struct fenwick2d {
@@ -43,11 +43,11 @@ template <class T> struct fenwick2d {
         for (++i; i <= n; i += i & -i)
             ft[i].add(zip(i, y), a);
     }
-    T sum(int x, int y) const {
+    T sum(int x, int y) const { // 这个板子不算边界的
         T s = 0;
         for (int i = zip(x); i; i -= i & -i)
             s += ft[i].sum(zip(i, y));
         return s;
     }
-    T sum(int lx, int rx, int ly, int ry) const { return sum(rx, ry) - sum(rx, ly) - sum(lx, ry) + sum(lx, ly); }
+    T sum(int lx, int rx, int ly, int ry) const { return sum(rx, ry) - sum(rx, ly) - sum(lx, ry) + sum(lx, ly); } // [lx,rx),[ly,ry)
 };
