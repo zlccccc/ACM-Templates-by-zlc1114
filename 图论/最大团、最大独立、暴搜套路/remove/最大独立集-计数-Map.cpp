@@ -62,9 +62,9 @@ template<typename T>inline void max_(T &A,T B) {(A<B) &&(A=B);}
 template<typename T>inline void min_(T &A,T B) {(A>B) &&(A=B);}
 template<typename T>inline T abs(T a) {return a>0?a:-a;}
 template<typename T>inline T fastgcd(T a, T b) {
-    int az=__builtin_ctz(a),bz=__builtin_ctz(b),z=min(az,bz),diff; b>>=bz;
+    int az=__builtin_ctzll(a),bz=__builtin_ctzll(b),z=min(az,bz),diff; b>>=bz;
     while (a) {
-        a>>=az; diff=b-a; az=__builtin_ctz(diff);
+        a>>=az; diff=b-a; az=__builtin_ctzll(diff);
         min_(b,a); a=abs(diff);
     }
     return b<<z;
@@ -105,20 +105,6 @@ struct mint {
     bool operator<(const mint &a)const { return x < a.x;}
     bool operator==(const mint &a)const { return x == a.x;}
 };
-// struct comb {
-//     vector<mint> f, g; // f:fac; g:inv
-//     comb() {}
-//     comb(int mx):f(mx+1),g(mx+1) {
-//         f[0] = 1;
-//         rREP_(i,mx) f[i] = f[i-1]*i;
-//         g[mx] = f[mx].pow(mod-2);
-//         for (int i=mx; i>0; i--) g[i-1] = g[i]*i;
-//     }
-//     mint operator()(int a, int b) {
-//         if (a < b) return 0;
-//         return f[a]*g[b]*g[a-b];
-//     }
-// } C(maxn);
 
 // 0、N比较大的时候可以试试随机shuffle一下贪心选择,或者转化为二分图
 // 1、最大团点的数量=补图中最大独立集点的数量
@@ -146,95 +132,100 @@ struct mint {
 
 // 最差时间复杂度是, sqrt个点度数是sqrt, 总复杂度sqrt*2^(sqrt/2)=sqrt*1.414^sqrt
 
-namespace clique {
+struct IndependentSet {  // ull in {int, long long}; 代表点数量>=k
     // 状态压缩一下N; N不要太大否则状态都存不下
-    typedef unsigned long long Type;
-    map<Type,mint> MP; // 记忆化
-    vector<Type> edge;
+    map<ull,ull> MP; // 记忆化
+    vector<ull> edge;
+    IndependentSet(int n=0) {init(n);}
     void init(int n) {
-        // printf("init %d\n",n);
-        assert(n<=64);
+        assert(n<64);
         MP.clear();
         edge.resize(n);
         fill(edge.begin(),edge.end(),0);
     }
     void addedge(int x,int y) {
-        assert(x<64); assert(y<64);
+        assert(max(x,y)<edge.size());
         // printf("addedge %d %d\n",x,y);
-        edge[x]|=(Type)1<<y;
-        edge[y]|=(Type)1<<x;
+        edge[x]|=1ull<<y;
+        edge[y]|=1ull<<x;
     }
     void flip() { // 变成补图(团=补图独立集)
-        for (Type &e:edge) e^=((Type)1<<edge.size())-1;
+        for (ull &e:edge) e^=(1ull<<edge.size())-1;
     }
-    mint independent_set(ll S) {
+    ull independent_set(ull S) {
         // printf("solve %lld ",S);
         // pr2(S,edge.size());
         // puts("");
         // S: 当前存在哪些id set
         if (!S) return 1;
         if (MP.count(S)) return MP[S];
-        int c=__builtin_popcount(S),id=__builtin_ctz(S),mxsz=-1;
+        int c=__builtin_popcountll(S),id=__builtin_ctzll(S),mxsz=-1;
         if (c>=10) { // 2.如果可以把团分成不相交的两份, 那就直接分成两半去搞然后乘起来
-            int mask=S; // mask:从id能走到的点
-            for (int cur=(Type)1<<id; cur;) {
-                int x=__builtin_ctz(cur); mask^=(Type)1<<x;
+            auto mask=S; // mask:从id能走到的点
+            for (auto cur=1ull<<id; cur;) {
+                int x=__builtin_ctzll(cur); mask^=1ull<<x;
                 cur=(cur|edge[x])&mask;
             }
             if (mask) { // 可以分成两块
-                mint res1=independent_set(mask),res2=independent_set(S^mask);
-                mint ans=res1*res2;
+                ull res1=independent_set(mask),res2=independent_set(S^mask);
+                ull ans=res1*res2;
                 return ans;
             }
         }
-        for (int cur=S; cur;) { // 1.枚举的点度数最大
-            int x=__builtin_ctz(cur),cursz=__builtin_popcountll(S&edge[x]);
+        for (auto cur=S; cur;) { // 1.枚举的点度数最大
+            int x=__builtin_ctzll(cur),cursz=__builtin_popcountll(S&edge[x]);
             if (cursz>mxsz) mxsz=cursz,id=x;
-            cur^=(Type)1<<x;
+            cur^=1ull<<x;
         }
-        mint res1=independent_set(S^(Type)1<<id);
-        mint res2=independent_set(S&~(edge[id]|(Type)1<<id));
-        mint ans=res1+res2;
+        ull res1=independent_set(S^1ull<<id);
+        ull res2=independent_set(S&~(edge[id]|1ull<<id));
+        ull ans=res1+res2;
         if (c<=(int)edge.size()/2) MP[S]=ans;
         return ans;
     }
+};
+
+template<typename T>
+T count_clique(vector<vector<int>> edge) {
+    int n=edge.size();
+    vector<int> deg(n),reid(n,-1);
+    REP_(i,n) deg[i]=edge[i].size();
+    T ans=0;
+    IndependentSet clique;
+    REP_(i,n) {
+        int x=-1,cur_n=0;
+        REP_(k,n) if (deg[k]!=-1&&(x==-1||deg[k]<deg[x])) x=k;
+        deg[x]=-1;
+        for (int y:edge[x]) if (deg[y]!=-1) reid[y]=cur_n++;
+        clique.init(cur_n);
+        for (int y:edge[x]) if (reid[y]!=-1)
+            for (int z:edge[y]) if (reid[z]!=-1)
+                    clique.addedge(reid[y],reid[z]);
+        clique.flip();
+        ans+=clique.independent_set((1ull<<cur_n)-1);
+        for (int y:edge[x]) reid[y]=-1;
+    }
+    return ans;
 }
 
 int solve() {
     int n,m;
     scanf("%d%d",&n,&m);
-    vector<vector<int>> edge(n+1);
+    vector<vector<int>> edge(n);
     FOR_(i,1,m) {
         int x,y;
         scanf("%d%d",&x,&y);
+        x--; y--;
         edge[x].push_back(y);
         edge[y].push_back(x);
     }
-    vector<int> id(n+1),pos(n+1);
-    FOR_(i,1,n) id[i]=i;
-    sort(id.begin()+1,id.begin()+1+n,[&](int x,int y) {
-        return edge[x].size()<edge[y].size();
-    });
-    mint ans=0;
-    FOR_(i,1,n) pos[id[i]]=i;
-    FOR_(i,1,n) {
-        int x=id[i],cur_n=0;
-        vector<int> reid(n+1,-1); // 给最大团用的
-        for (int y:edge[x]) if (id[y]>id[x])
-                reid[y]=cur_n++;
-        clique::init(cur_n);
-        FOR_(y,1,n) if (reid[y]!=-1)
-            for (int z:edge[y]) if (reid[z]!=-1)
-                    clique::addedge(reid[y],reid[z]);
-        clique::flip();
-        ans+=clique::independent_set(((clique::Type)1<<cur_n)-1);
-    }
-    printf("%lld\n",ans.x);
+    printf("%lld\n",count_clique<mint>(edge).x);
     return 0;
 }
+
 int main() {
     solve();
-    while (1) solve();
+    // while (1) solve();
 }
 /*
 3 2
