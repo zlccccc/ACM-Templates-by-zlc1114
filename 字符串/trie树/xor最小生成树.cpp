@@ -1,16 +1,4 @@
-#include <cstdio>
-#include <iostream>
-#include <algorithm>
-#include <vector>
-#include <set>
-#include <map>
-#include <string>
-#include <cstring>
-#include <stack>
-#include <queue>
-#include <cmath>
-#include <ctime>
-#include <utility>
+#include <bits/stdc++.h>
 using namespace std;
 #define REP(I,N) for (I=0;I<N;I++)
 #define rREP(I,N) for (I=N-1;I>=0;I--)

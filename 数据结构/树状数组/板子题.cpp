@@ -16,6 +16,40 @@ template <class T> struct fenwick {
     T sum(int l, int r) const { return sum(r) - sum(l - 1); }
 };
 
+template <class T> struct rangeFenwick {
+    struct RMat {
+        T i, x;
+        RMat(T _i = 0, T _x = 0) : i(_i), x(_x) {}
+        RMat &operator+=(const RMat &a) { i += a.i, x += a.x, return *this; }
+    };
+    fenwick<RMat> bit;
+    rangeFenwick(int n) : bit(n) {}
+    void add(int x, T val) { bit.add(x, {val, x * val}); } // 添加一个右边的矩阵
+    void add(int l, int r, T val) { add(l, val), add(r + 1, -val); }
+    T sum(int x) {
+        RMat cur = bit.sum(x);
+        return cur.i * (x + 1) - cur.x; // (x-dx+1)
+    }
+    T sum(int l, int r) { return sum(r) - sum(l - 1); }
+};
+
+template <class T> struct fixSizeFenwick2d { // id-range: int; 单点修改区间求和
+    vector<fenwick<T>> ft;
+    fixSizeFenwick2d(int n, int m) : ft(n + 1, fenwick<T>(m)) {}
+    void add(int x, int y, T a) {
+        assert(1 <= x && x < (int)ft.size());
+        for (int i = x; i < (int)ft.size(); i += i & -i)
+            ft[i].add(y, a);
+    }
+    T sum(int x, int y) const { // 这个板子不算边界的
+        T s = {0};
+        for (int i = x; i; i -= i & -i)
+            s += ft[i].sum(y);
+        return s;
+    }
+    T sum(int lx, int ly, int rx, int ry) const { return sum(rx, ry) - sum(rx, ly - 1) - sum(lx - 1, ry) + sum(lx - 1, ly - 1); }
+};
+
 template <class T> struct fenwick2d { // id-range: int; 单点修改区间求和
     vector<pair<int, int>> ps;
     vector<int> xs;
@@ -63,10 +97,7 @@ template <class T> struct rangeFenwick2d {
     struct RDMat {
         T i, x, y, xy;
         RDMat(T _i = 0, T _x = 0, T _y = 0, T _xy = 0) : i(_i), x(_x), y(_y), xy(_xy) {}
-        RDMat &operator+=(const RDMat &a) {
-            i += a.i, x += a.x, y += a.y, xy += a.xy;
-            return *this;
-        }
+        RDMat &operator+=(const RDMat &a) { i += a.i, x += a.x, y += a.y, xy += a.xy, return *this; }
     };
     fenwick2d<RDMat> bit;
     void add_point(int lx, int ly, int rx, int ry) {
@@ -76,9 +107,7 @@ template <class T> struct rangeFenwick2d {
         bit.add_point(rx + 1, ry + 1);
     }
     void build() { bit.build(); }
-    void add(int x, int y, T val) { // 添加一个右下角的矩阵
-        bit.add(x, y, {val, x * val, y * val, x * y * val});
-    }
+    void add(int x, int y, T val) { bit.add(x, y, {val, x * val, y * val, x * y * val}); } // 添加一个右下角的矩阵
     void add(int lx, int ly, int rx, int ry, T val) {
         add(lx, ly, val);
         add(lx, ry + 1, -val);
@@ -87,8 +116,7 @@ template <class T> struct rangeFenwick2d {
     }
     T sum(int x, int y) {
         RDMat cur = bit.sum(x, y);
-        // (x-dx+1)(y-dy+1)
-        return cur.i * (x + 1) * (y + 1) - cur.x * (y + 1) - cur.y * (x + 1) + cur.xy;
+        return cur.i * (x + 1) * (y + 1) - cur.x * (y + 1) - cur.y * (x + 1) + cur.xy; // (x-dx+1)(y-dy+1)
     }
     T sum(int lx, int ly, int rx, int ry) { return sum(rx, ry) - sum(rx, ly - 1) - sum(lx - 1, ry) + sum(lx - 1, ly - 1); }
 };

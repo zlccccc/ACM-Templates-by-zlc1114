@@ -151,6 +151,8 @@ namespace fastIO {//感觉没问题, 测试几次
     inline void print(T x) {Ostream::print(x);}
     template<typename T>
     inline void println(T x) {print(x); Ostream::oc('\n');}
+    template<typename T, typename... Args>
+    inline void read(T &x, Args&... args) { read(x); read(args...); }
 }
 using namespace fastIO;
 
